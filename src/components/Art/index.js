@@ -1,14 +1,6 @@
 import React, { useRef } from "react";
 import styled from "styled-components";
 
-const Stripe = styled.div`
-  width: ${props => props.width}px;
-  background-color: ${props => props.color};
-  display: flex;
-  flex-grow: 1;
-  transition: all 0.3s ease-in-out;
-`;
-
 const StripeContainer = styled.div`
   position: relative;
   height: ${props => props.height}px;
@@ -35,17 +27,7 @@ const LogoContainer = styled.div`
   position: absolute;
   top: ${props => props.top}px;
   left: ${props => props.left}px;
-  font-size: 100px;
-  color: white;
-  text-shadow: 10px 30px 20px #000000;
-  transition: all 0.3s ease-in-out;
-`;
-
-const TrackNameContainer = styled.div`
-  position: absolute;
-  top: ${props => props.top}px;
-  left: ${props => props.left}px;
-  font-size: 30px;
+  font-size: 200px;
   color: white;
   text-shadow: 10px 30px 20px #000000;
   transition: all 0.3s ease-in-out;
@@ -81,25 +63,47 @@ const Art = ({
   texture,
   stripes,
   forwardedRef,
+  activeStripes,
   top,
   left
 }) => {
   const logoRef = useRef(null);
   return (
     <StripeContainer ref={forwardedRef}>
-      {stripes.map(({ color, width }) => (
-        <div
-          style={{
-            backgroundColor: color,
-            width,
-            display: "flex",
-            flexGrow: 1,
-            transition: "all 0.3s ease-in-out"
-          }}
-          color={color}
-          width={width}
-        />
-      ))}
+      {stripes.map(
+        ({ color, width }, index) =>
+          console.log(
+            Object.assign(
+              {},
+              ...activeStripes
+                .filter(a => a.index === index)
+                .map(({ activeStyle }) => ({
+                  ...activeStyle
+                }))
+            )
+          ) || (
+            <div
+              style={{
+                backgroundColor: color,
+                width,
+                display: "flex",
+                flexGrow: 1,
+                opacity: activeStripes.includes(index) ? 0 : 1,
+                transition: "all 0.3s ease-in-out",
+                ...Object.assign(
+                  {},
+                  ...activeStripes
+                    .filter(a => a.index === index)
+                    .map(({ activeStyle }) => ({
+                      ...activeStyle
+                    }))
+                )
+              }}
+              color={color}
+              width={width}
+            />
+          )
+      )}
       {dotColors.map(color => (
         <Dot
           color={color}
@@ -110,7 +114,20 @@ const Art = ({
       ))}
       <Texture texture={texture.value} />
       <Gradient />
-      <LogoContainer top={top} left={left} ref={logoRef}>
+      {console.log(
+        forwardedRef.current && forwardedRef.current.getBoundingClientRect()
+      )}
+      <LogoContainer
+        top={
+          forwardedRef.current &&
+          forwardedRef.current.getBoundingClientRect().height / 2
+        }
+        left={
+          forwardedRef.current &&
+          forwardedRef.current.getBoundingClientRect().width / 2
+        }
+        ref={logoRef}
+      >
         VEDADO
       </LogoContainer>
     </StripeContainer>

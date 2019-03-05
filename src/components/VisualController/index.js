@@ -11,9 +11,16 @@ const Container = styled.div`
   flex-grow: 1;
   flex-direction: row;
   height: 1200px;
-  background-color: #1b1b1b;
+  background-color: white;
   color: white;
   width: 100%;
+`;
+
+const Controller = styled.div`
+  position: fixed;
+  top: 15;
+  left: 15;
+  z-index: 1;
 `;
 
 const generateColors = (number, hue) => {
@@ -54,11 +61,22 @@ class VisualController extends React.Component {
       dotColors: generateColors(0, "random"),
       stripes: generateStripes(15, "random"),
       texture: "none",
-      colors: generateColors(1000, "random")
+      colors: generateColors(1000, "random"),
+      activeStripes: [],
+      randomizeColors: false,
+      randomizeWidths: false,
+      randomizeTexture: false,
+      activeStreak: false,
+      alternatingFlashes: false,
+      flash: false
     };
 
     this.randomizeColors = this.randomizeColors.bind(this);
     this.randomizeWidths = this.randomizeWidths.bind(this);
+    this.randomizeTexture = this.randomizeTexture.bind(this);
+    this.activeStreak = this.activeStreak.bind(this);
+    this.alternatingFlashes = this.alternatingFlashes.bind(this);
+    this.flash = this.flash.bind(this);
   }
 
   handleStripeNumberChange(event) {
@@ -128,6 +146,55 @@ class VisualController extends React.Component {
     }));
   }
 
+  activeStreak() {
+    const initialActiveStreak = [
+      { index: -2, activeStyle: { opacity: 0.7 } },
+      { index: -1, activeStyle: { opacity: 0.3 } },
+      { index: 0, activeStyle: { opacity: 0 } },
+      { index: 1, activeStyle: { opacity: 0.3 } },
+      { index: 2, activeStyle: { opacity: 0.7 } }
+    ];
+
+    const step = streak =>
+      streak.map(({ index, activeStyle }) => ({
+        index: index === this.state.stripes.length ? 0 : index + 1,
+        activeStyle
+      }));
+
+    if (this.state.activeStripes.length === 0) {
+      this.setState({
+        activeStripes: initialActiveStreak
+      });
+    } else {
+      this.setState(({ activeStripes: a }) => ({
+        activeStripes:
+          a[0] === this.state.stripes.length
+            ? initialActiveStreak
+            : step(this.state.activeStripes)
+      }));
+    }
+  }
+
+  alternatingFlashes() {
+    const numbers = Array.from(Array(this.state.stripes.length).keys());
+    if (
+      this.state.activeStripes.length === 0 ||
+      this.state.activeStripes.includes(2)
+    ) {
+      this.setState({ activeStripes: numbers.filter(n => n % 2) });
+    } else {
+      this.setState({ activeStripes: numbers.filter(n => (n % 2) - 1) });
+    }
+  }
+
+  flash() {
+    const numbers = Array.from(Array(this.state.stripes.length).keys());
+    setTimeout(() => this.setState({ activeStripes: numbers }), 150);
+    setTimeout(() => this.setState({ activeStripes: [] }), 350);
+    setTimeout(() => this.setState({ activeStripes: numbers }), 1000);
+    setTimeout(() => this.setState({ activeStripes: [] }), 1200);
+  }
+
   handleColorChange = (index, color) => this.changeColor(index, color);
 
   randomizeTexture() {
@@ -142,21 +209,91 @@ class VisualController extends React.Component {
       artHeight,
       stripes,
       dotColors,
+      activeStripes,
       texture
     } = this.state;
     return (
       <Container>
+        <Controller>
+          <button
+            onClick={() =>
+              this.setState(prevState => ({ flash: !prevState.flash }))
+            }
+          >
+            flash
+          </button>
+          <button
+            onClick={() =>
+              this.setState(prevState => ({
+                alternatingFlashes: !prevState.alternatingFlashes
+              }))
+            }
+          >
+            alternatingFlashes
+          </button>
+          <button
+            onClick={() =>
+              this.setState(prevState => ({
+                activeStreak: !prevState.activeStreak
+              }))
+            }
+          >
+            activeStreak
+          </button>
+          <button
+            onClick={() =>
+              this.setState(prevState => ({
+                randomizeColors: !prevState.randomizeColors
+              }))
+            }
+          >
+            randomizeColors
+          </button>
+          <button
+            onClick={() =>
+              this.setState(prevState => ({
+                randomizeTexture: !prevState.randomizeTexture
+              }))
+            }
+          >
+            randomizeTexture
+          </button>
+          <button
+            onClick={() =>
+              this.setState(prevState => ({
+                randomizeWidths: !prevState.randomizeWidths
+              }))
+            }
+          >
+            randomizeWidths
+          </button>
+        </Controller>
         <ReactInterval
           timeout={300}
-          enabled={true}
+          enabled={this.state.randomizeColors}
           callback={() => {
             setTimeout(this.randomizeColors, 500);
           }}
         />
         <ReactInterval
           timeout={300}
-          enabled={true}
+          enabled={this.state.randomizeWidths}
           callback={this.randomizeWidths}
+        />
+        <ReactInterval
+          timeout={800}
+          enabled={this.state.flash}
+          callback={this.flash}
+        />
+        <ReactInterval
+          timeout={500}
+          enabled={this.state.randomizeTexture}
+          callback={this.randomizeTexture}
+        />
+        <ReactInterval
+          timeout={50}
+          enabled={this.state.activeStreak}
+          callback={this.activeStreak}
         />
         <Art
           top={top}
@@ -166,6 +303,7 @@ class VisualController extends React.Component {
           dotColors={dotColors}
           texture={texture}
           stripes={stripes}
+          activeStripes={activeStripes}
           ref={this.artRef}
         />
       </Container>
