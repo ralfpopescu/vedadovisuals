@@ -88,7 +88,17 @@ const Art = ({
   return (
     <StripeContainer ref={forwardedRef}>
       {stripes.map(({ color, width }) => (
-        <Stripe color={color} width={width} />
+        <div
+          style={{
+            backgroundColor: color,
+            width,
+            display: "flex",
+            flexGrow: 1,
+            transition: "all 0.3s ease-in-out"
+          }}
+          color={color}
+          width={width}
+        />
       ))}
       {dotColors.map(color => (
         <Dot

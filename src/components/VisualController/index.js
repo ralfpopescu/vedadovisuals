@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Art from "../Art";
 import { textures } from "../../textures";
 import randomColor from "randomcolor";
+import ReactInterval from "react-interval";
 
 const Container = styled.div`
   position: absolute;
@@ -36,6 +37,10 @@ const generateStripes = (number, hue) => {
   }));
 };
 
+const randomInteger = (min, max) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
 class VisualController extends React.Component {
   constructor(props) {
     super(props);
@@ -48,8 +53,12 @@ class VisualController extends React.Component {
       numberOfDots: 0,
       dotColors: generateColors(0, "random"),
       stripes: generateStripes(15, "random"),
-      texture: "none"
+      texture: "none",
+      colors: generateColors(1000, "random")
     };
+
+    this.randomizeColors = this.randomizeColors.bind(this);
+    this.randomizeWidths = this.randomizeWidths.bind(this);
   }
 
   handleStripeNumberChange(event) {
@@ -73,19 +82,16 @@ class VisualController extends React.Component {
     this.setState({ texture: value });
   }
 
+  chooseRandomColor() {
+    return;
+  }
+
   randomizeColors() {
-    this.setState({
-      stripeColors: generateColors(this.state.numberOfStripes, this.state.hue)
-    });
-    this.setState({
-      dotColors: generateColors(this.state.numberOfDots, this.state.hue)
-    });
     this.setState(prevState => ({
       stripes: prevState.stripes.map(stripe => ({
-        color: randomColor({
-          luminosity: "random",
-          hue: this.state.hue
-        }),
+        color: this.state.colors[
+          [randomInteger(0, this.state.colors.length - 1)]
+        ],
         width: stripe.width
       }))
     }));
@@ -125,11 +131,7 @@ class VisualController extends React.Component {
   handleColorChange = (index, color) => this.changeColor(index, color);
 
   randomizeTexture() {
-    const randomInteger = (min, max) => {
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-    };
-
-    this.handleTextureChange(textures[randomInteger(1, textures.length - 1)]);
+    this.handleTextureChange(textures[randomInteger(0, textures.length - 1)]);
   }
 
   render() {
@@ -144,6 +146,18 @@ class VisualController extends React.Component {
     } = this.state;
     return (
       <Container>
+        <ReactInterval
+          timeout={300}
+          enabled={true}
+          callback={() => {
+            setTimeout(this.randomizeColors, 500);
+          }}
+        />
+        <ReactInterval
+          timeout={300}
+          enabled={true}
+          callback={this.randomizeWidths}
+        />
         <Art
           top={top}
           left={left}
