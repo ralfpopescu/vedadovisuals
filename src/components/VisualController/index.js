@@ -70,16 +70,9 @@ class VisualController extends React.Component {
       alternatingFlashes: false,
       flash: false
     };
-
-    this.randomizeColors = this.randomizeColors.bind(this);
-    this.randomizeWidths = this.randomizeWidths.bind(this);
-    this.randomizeTexture = this.randomizeTexture.bind(this);
-    this.activeStreak = this.activeStreak.bind(this);
-    this.alternatingFlashes = this.alternatingFlashes.bind(this);
-    this.flash = this.flash.bind(this);
   }
 
-  handleStripeNumberChange(event) {
+  handleStripeNumberChange = event => {
     this.setState({ numberOfStripes: event.target.value });
     this.setState({
       stripeColors: generateColors(event.target.value, this.state.hue)
@@ -87,24 +80,24 @@ class VisualController extends React.Component {
     this.setState({
       stripes: generateStripes(event.target.value, this.state.hue)
     });
-  }
+  };
 
-  handleDotNumberChange(event) {
+  handleDotNumberChange = event => {
     this.setState({ numberOfDots: event.target.value });
     this.setState({
       dotColors: generateColors(event.target.value, this.state.hue)
     });
-  }
+  };
 
-  handleTextureChange(value) {
+  handleTextureChange = value => {
     this.setState({ texture: value });
-  }
+  };
 
   chooseRandomColor() {
     return;
   }
 
-  randomizeColors() {
+  randomizeColors = () => {
     this.setState(prevState => ({
       stripes: prevState.stripes.map(stripe => ({
         color: this.state.colors[
@@ -113,18 +106,18 @@ class VisualController extends React.Component {
         width: stripe.width
       }))
     }));
-  }
+  };
 
-  randomizeWidths() {
+  randomizeWidths = () => {
     this.setState(prevState => ({
       stripes: prevState.stripes.map(stripe => ({
         color: stripe.color,
         width: Math.round(Math.random() * 100)
       }))
     }));
-  }
+  };
 
-  changeColor(index, color) {
+  changeColor = (index, color) => {
     this.setState(prevState => ({
       stripes: prevState.stripes.map((stripe, i) => {
         if (i === index) {
@@ -133,9 +126,9 @@ class VisualController extends React.Component {
         return stripe;
       })
     }));
-  }
+  };
 
-  changeWidth(index, width) {
+  changeWidth = (index, width) => {
     this.setState(prevState => ({
       stripes: prevState.stripes.map((stripe, i) => {
         if (i === index) {
@@ -144,9 +137,9 @@ class VisualController extends React.Component {
         return stripe;
       })
     }));
-  }
+  };
 
-  activeStreak() {
+  activeStreak = () => {
     const initialActiveStreak = [
       { index: -2, activeStyle: { opacity: 0.7 } },
       { index: -1, activeStyle: { opacity: 0.3 } },
@@ -173,9 +166,9 @@ class VisualController extends React.Component {
             : step(this.state.activeStripes)
       }));
     }
-  }
+  };
 
-  alternatingFlashes() {
+  alternatingFlashes = () => {
     const numbers = Array.from(Array(this.state.stripes.length).keys());
     if (
       this.state.activeStripes.length === 0 ||
@@ -185,21 +178,21 @@ class VisualController extends React.Component {
     } else {
       this.setState({ activeStripes: numbers.filter(n => (n % 2) - 1) });
     }
-  }
+  };
 
-  flash() {
+  flash = () => {
     const numbers = Array.from(Array(this.state.stripes.length).keys());
     setTimeout(() => this.setState({ activeStripes: numbers }), 150);
     setTimeout(() => this.setState({ activeStripes: [] }), 350);
     setTimeout(() => this.setState({ activeStripes: numbers }), 1000);
     setTimeout(() => this.setState({ activeStripes: [] }), 1200);
-  }
+  };
 
   handleColorChange = (index, color) => this.changeColor(index, color);
 
-  randomizeTexture() {
+  randomizeTexture = () => {
     this.handleTextureChange(textures[randomInteger(0, textures.length - 1)]);
-  }
+  };
 
   render() {
     const {
